@@ -1,0 +1,77 @@
+import React, { useState } from 'react';
+import { Search } from 'lucide-react';
+import VoucherCard from './VoucherCard';
+import { Voucher } from '../../types';
+import { dummyVouchers } from '../../data/dummyVouchers';
+
+interface VoucherListProps {
+  vouchers: Voucher[]; // Gunakan tipe Voucher, bukan dummyVouchers
+  onDelete: (id: string) => void;
+  loading: boolean;
+}
+
+
+const VoucherList: React.FC<VoucherListProps> = ({ vouchers, onDelete, loading }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Filter vouchers based on search term
+  const filteredVouchers = dummyVouchers.filter(voucher => 
+    voucher.ocrText.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (voucher.title && voucher.title.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+  
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+  
+  if (dummyVouchers.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500 mb-4">No vouchers or invoices found.</p>
+        <p className="text-sm text-gray-400">Scan your first document to get started.</p>
+      </div>
+    );
+  }
+  
+  return (
+    <div>
+      {/* Search input */}
+      <div className="mb-6 relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Search className="h-5 w-5 text-gray-400" />
+        </div>
+        <input
+          type="text"
+          placeholder="Search documents..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+        />
+      </div>
+      
+      {/* No results message */}
+      {filteredVouchers.length === 0 && searchTerm && (
+        <div className="text-center py-8">
+          <p className="text-gray-500">No results found for "{searchTerm}"</p>
+        </div>
+      )}
+      
+      {/* Voucher list */}
+      <div className="space-y-4">
+        {filteredVouchers.map(voucher => (
+          <VoucherCard
+            key={voucher.id}
+            voucher={voucher}
+            onDelete={onDelete}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default VoucherList;
